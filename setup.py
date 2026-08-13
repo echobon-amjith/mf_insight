@@ -24,7 +24,7 @@ setup(
     name='code',
     version='0.1.0',
     license='Private',
-    description='A data science project package',
+    description='A MF project package',
     long_description=read('README.md'),
     packages=find_packages('code'),
     package_dir={'': 'code'}
