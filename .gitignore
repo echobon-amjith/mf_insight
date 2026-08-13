@@ -1,8 +1,5 @@
 data/**
-# Test Data
-/cas_pdf/*.pdf
-pdf_cred.py
-main.ipynb
+
 
 
 
