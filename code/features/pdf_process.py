@@ -1,36 +1,32 @@
-from pathlib import Path
-
 import pandas as pd
 import pdfplumber
+import streamlit as st
 
-class table_extract:
-    """Extract tables from encrypted or unencrypted PDFs."""
+@st.cache_data
+def pdf_table_df(pdf_path, passw) -> pd.DataFrame:
+    with pdfplumber.open(pdf_path,password= passw) as pdf:
+        page = pdf.pages[0]
 
-    def __init__(self, pdf_path: str, password: str | None = None):
-        self.pdf_path = Path(pdf_path)
-        self.password = password
+        # Cropping the page to the required table 
+        bounding_box = (0,round(page.height/4)+39,page.width,page.height)
+        cropped_page = page.crop(bounding_box)
 
-    def table_df(self) -> pd.DataFrame:
-        with pdfplumber.open(self.pdf_path,password= self.password) as pdf:
-            page = pdf.pages[0]
-            bounding_box = (0,round(page.height/4)+39,page.width,page.height)
-            cropped_page = page.crop(bounding_box)
+        # Extracting the required table
+        table_settings = {
+            "vertical_strategy": "text",
+            "horizontal_strategy": "lines"
+        }
+        table = cropped_page.extract_table(table_settings)
 
-            table_settings = {
-                "vertical_strategy": "text",
-                "horizontal_strategy": "lines"
-            }
+        # Deleting the last row of Total and transforming into a DataFrame
+    df= pd.DataFrame(table[:-1])
+    # Selecting the ISIN, Cost Value and Unit Balance Columns
+    clean_df= df[[1,6,7]]
+    clean_df.columns= ['ISIN', 'Cost Value', 'Unit Balance']
 
-            table = cropped_page.extract_table(table_settings)
-            df= pd.DataFrame(table, columns=['Folio Id', 'ISIN', 'Scheme Name', '','','','Cost Value', 'Unit Balance', 'NAV Date', 'NAV', 'Market Value'])
-            clean_df= df.drop(index=df.index[-1], columns=['Folio Id','Scheme Name','','',''])
+    for col in clean_df.columns[1:]:
+        clean_df[col] = clean_df[col].str.replace(',','',regex=False)
+        clean_df[col] = pd.to_numeric(clean_df[col])
 
-            return clean_df
-
-    def wh(self):
-        with pdfplumber.open(self.pdf_path,password= self.password) as pdf:
-            page = pdf.pages[0]
-
-            self.w = page.width
-            self.h = page.height
+    return clean_df
 
