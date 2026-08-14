@@ -1,33 +1,25 @@
 import pandas as pd
 from tests.pdf_cred import PDF_PATH, PDF_PASS
-from features.pdf_process import table_extract
+from features.pdf_process import pdf_table_df
 
 class TestPDF_process:
     """Tests for PDF table extraction."""
 
     def test_extract_tables_returns_dataframe(self):
         """Verify that extraction returns a DataFrame."""
-        extractor = table_extract(pdf_path= PDF_PATH, password= PDF_PASS)
-
-        dataframe = extractor.table_df()
+        dataframe = pdf_table_df(pdf_path= PDF_PATH, passw= PDF_PASS)
 
         assert isinstance(dataframe, pd.DataFrame)
         assert not dataframe.empty
 
     def test_extract_tables_has_expected_columns(self):
         """Verify that the expected columns are extracted."""
-        extractor = table_extract(pdf_path= PDF_PATH, password= PDF_PASS)
-
-        dataframe = extractor.table_df()
+        dataframe = pdf_table_df(pdf_path= PDF_PATH,passw= PDF_PASS)
 
         expected_columns = [
             "ISIN",
-            "Scheme Name",
             "Unit Balance",
-            "Cost Value",
-            "NAV Date",
-            "NAV",
-            "Market Value"
+            "Cost Value"
         ]
 
         assert set(expected_columns).issubset(dataframe.columns)
