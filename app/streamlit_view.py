@@ -1,5 +1,5 @@
 import streamlit as st
-from features.pdf_process import pdf_table_df
+from features.pdf_process import MFtable
 
 st.title("Extract your portfolio from CAS")
 
@@ -8,8 +8,12 @@ pdf_pass = st.text_input(label= "Enter Password (If encrypted)", type= "password
 
 if st.button(label = "Extract"):
     if pdf_file is not None:
-        df = pdf_table_df(pdf_file,pdf_pass)
+        proc= MFtable(pdf_file, pdf_pass)
+        df=proc.mfc_table_df()
+        df["Market Value"]= df["Unit Balance"]*df["NAV"]
+        df["Average NAV"] = df["Cost Value"]/df["Unit Balance"]
         st.write("### Your Mutual Fund Portfolio")
-        st.dataframe(df)
+        st.write(df)
+
     else:
         st.warning("Please attach a PDF file first before clicking the button.")
