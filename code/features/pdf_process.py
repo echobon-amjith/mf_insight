@@ -62,8 +62,9 @@ class MFtable:
         df[num_columns] = df[num_columns].replace("," , "",regex=True)
 
         # Convert all 3 columns to float
-        df[num_columns] = df[num_columns].apply(pd.to_numeric) 
-            
+        df[num_columns] = df[num_columns].apply(pd.to_numeric)
+
+        df.drop(columns= ["Scheme Name", "NAV"], inplace= True)
 
         self._close()
 
@@ -187,6 +188,7 @@ class MFtable:
         )
 
         return vertical_lines
+
 
 
 
