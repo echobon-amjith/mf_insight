@@ -74,10 +74,16 @@ class NAVFetcher:
 
         return target_date
 
-    def _past_business_dates(self,target_date, timeframe: str) -> date:
+    def past_business_dates(self,target_date, timeframe: str) -> date:
         latest_day = self._nearest_business_day(target_date)
 
-        if timeframe == "week":
+        if timeframe == "latest":
+            past_date = latest_day
+
+        elif timeframe == "day":
+            past_date = latest_day - timedelta(days=1)
+
+        elif timeframe == "week":
             past_date = latest_day - timedelta(weeks=1)
 
         elif timeframe == "month":
@@ -91,7 +97,7 @@ class NAVFetcher:
 
         else:
             raise ValueError(
-                "Invalid timeframe. Use 'week', 'month', 'quarter' or 'year'"
+                "Invalid timeframe. Use 'latest', 'day', 'week', 'month', 'quarter' or 'year'"
             )
 
         past_business_day = self._nearest_business_day(past_date)
