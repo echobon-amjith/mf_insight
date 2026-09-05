@@ -1,4 +1,5 @@
-data/**
+data/daily_cache/*
+!data/daily_cache/.gitkeep
 
 
 

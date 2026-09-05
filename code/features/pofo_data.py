@@ -25,7 +25,7 @@ class MFdata:
 
     def get_pofo_value(self,timeframe, lookup_columns:list = ["NAV_Name", "ISIN", "hNAV_Date", "hNAV_Amt"]):
         pdf= MFtable(self.pdf_path, self.password)
-        df= pdf.mfc_table_df()
+        df= pdf.pofo_overview()
         lookup_latest_nav_df = self._mf_nav_fetch("latest")
         lookup_prev_nav_df = self._mf_nav_fetch(timeframe)
         nav_pf_data= df.merge(
@@ -54,14 +54,16 @@ class MFdata:
 
         return data
 
-    def get_processed_pofo_data(self,timeframe,df_columns:list =["Date", "Fund Name", "Cost Value", "Current Value", "All-Portfolio %", "Total Gain", "Gain %", "Gain"]):
+    def get_processed_pofo_data(self,timeframe,df_columns:list =["Date", "Fund Name", "Cost Value", "Current Value", "All-Portfolio %", "Total Gain", "Total Gain %", "Gain", "Gain %"]):
         data= self.col_rename(self.get_pofo_value(timeframe))
         data["Date"] = pd.to_datetime(data["Date"])
         data["Date"]= data["Date"].dt.strftime('%Y-%m-%d')
         data["Current Value"]= (data["Unit Balance"]*data["Current NAV"]).round(2)
-        data["Gain"]= (data["Current Value"]-(data["Unit Balance"]*data["Previous NAV"])).round(2)
+        data["Previous Value"]= data["Unit Balance"]*data["Previous NAV"]
+        data["Gain"]= (data["Current Value"]-(data["Previous Value"])).round(2)
         data["Total Gain"]= (data["Current Value"]-data["Cost Value"]).round(2)
-        data["Gain %"]= ((data["Gain"]/data["Cost Value"])*100).round(2)
+        data["Total Gain %"]= ((data["Total Gain"]/(data["Cost Value"]))*100).round(2)
+        data["Gain %"]= ((data["Gain"]/(data["Previous Value"]))*100).round(2)
         data["All-Portfolio %"]= ((data["Current Value"]/sum(data["Current Value"]))*100).round(2)
 
         return data[df_columns]
